@@ -46,9 +46,20 @@ except Exception:
 # =========================
 
 def app_base_dir() -> Path:
-    """Lấy thư mục chạy app, hỗ trợ cả khi đóng gói PyInstaller."""
+    """Thư mục chứa EXE (hoặc source) — dùng cho input/output mặc định."""
     if getattr(sys, "frozen", False):
         return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+
+def resource_dir() -> Path:
+    """Thư mục chứa templates/assets đóng gói — ưu tiên thư mục EXE (installer),
+    fallback về sys._MEIPASS (standalone onefile)."""
+    exe_templates = app_base_dir() / "templates"
+    if exe_templates.exists():
+        return app_base_dir()
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS)
     return Path(__file__).resolve().parent
 
 
@@ -1338,9 +1349,9 @@ class HocBaApp(tk.Tk):
 
         self.input_dir = tk.StringVar(value=str(app_base_dir() / "input_sample"))
         self.output_dir = tk.StringVar(value=str(app_base_dir() / "output"))
-        default_template = app_base_dir() / "templates" / "hoc_ba_mau (2).xlsx"
+        default_template = resource_dir() / "templates" / "hoc_ba_mau (2).xlsx"
         if not default_template.exists():
-            default_template = app_base_dir() / "templates" / "hoc_ba_mau.xlsx"
+            default_template = resource_dir() / "templates" / "hoc_ba_mau.xlsx"
         self.template_file = tk.StringVar(value=str(default_template) if default_template.exists() else "")
         self.status_text = tk.StringVar(value="Sẵn sàng")
         self.items: Dict[str, Dict[str, object]] = {}

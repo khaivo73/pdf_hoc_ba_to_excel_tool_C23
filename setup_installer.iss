@@ -40,6 +40,7 @@ Name: "quicklaunchicon"; Description: "Tao bieu tuong tren thanh Taskbar"; Group
 
 [Files]
 Source: "dist\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".~lock.*,*.pdf"
 
 [Icons]
 Name: "{group}\{#AppNameVN}"; Filename: "{app}\{#AppExeName}"
