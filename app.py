@@ -53,13 +53,23 @@ def app_base_dir() -> Path:
 
 
 def resource_dir() -> Path:
-    """Thư mục chứa templates/assets đóng gói — ưu tiên thư mục EXE (installer),
+    """Thư mục chứa templates/assets — ưu tiên bên cạnh EXE (installer),
     fallback về sys._MEIPASS (standalone onefile)."""
     exe_templates = app_base_dir() / "templates"
     if exe_templates.exists():
         return app_base_dir()
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         return Path(sys._MEIPASS)
+    return Path(__file__).resolve().parent
+
+
+def user_data_dir() -> Path:
+    """Thư mục CÓ THỂ GHI cho input/output — Documents khi cài EXE,
+    cùng thư mục source khi chạy dev."""
+    if getattr(sys, "frozen", False):
+        d = Path.home() / "Documents" / "HocBaC23PdfToExcel"
+        d.mkdir(parents=True, exist_ok=True)
+        return d
     return Path(__file__).resolve().parent
 
 
@@ -882,14 +892,16 @@ def fill_rows_by_first_col(
 
 
 def load_field_map(template_path: Path) -> Optional[dict]:
-    csv_path = template_path.parent / "field_map.csv"
-    if csv_path.exists():
-        return load_field_map_csv(csv_path)
-
-    json_path = template_path.parent / "field_map.json"
-    if json_path.exists():
-        return json.loads(json_path.read_text(encoding="utf-8"))
+    # Tìm field_map.csv cùng thư mục với template, hoặc fallback về resource_dir/templates
+    for search_dir in [template_path.parent, resource_dir() / "templates"]:
+        csv_path = search_dir / "field_map.csv"
+        if csv_path.exists():
+            return load_field_map_csv(csv_path)
+        json_path = search_dir / "field_map.json"
+        if json_path.exists():
+            return json.loads(json_path.read_text(encoding="utf-8"))
     return None
+
 
 
 def load_field_map_csv(map_path: Path) -> dict:
@@ -1347,8 +1359,8 @@ class HocBaApp(tk.Tk):
         self.geometry("1050x650")
         self.minsize(950, 560)
 
-        self.input_dir = tk.StringVar(value=str(app_base_dir() / "input_sample"))
-        self.output_dir = tk.StringVar(value=str(app_base_dir() / "output"))
+        self.input_dir = tk.StringVar(value=str(user_data_dir() / "input_sample"))
+        self.output_dir = tk.StringVar(value=str(user_data_dir() / "output"))
         default_template = resource_dir() / "templates" / "hoc_ba_mau (2).xlsx"
         if not default_template.exists():
             default_template = resource_dir() / "templates" / "hoc_ba_mau.xlsx"
