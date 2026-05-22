@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chuyển PDF học bạ sang Excel</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #697386;
+      --line: #d9dee7;
+      --brand: #0f766e;
+      --brand-dark: #0b5f59;
+      --danger-bg: #fff2f0;
+      --danger: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+    main {
+      width: min(980px, calc(100% - 32px));
+      margin: 32px auto;
+    }
+    header {
+      margin-bottom: 18px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(24px, 4vw, 36px);
+      letter-spacing: 0;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .field {
+      border: 1px dashed #b9c2d0;
+      border-radius: 8px;
+      padding: 16px;
+      background: #fbfcfe;
+      min-height: 132px;
+    }
+    input[type="file"] {
+      width: 100%;
+      max-width: 100%;
+      color: var(--muted);
+    }
+    .hint {
+      margin-top: 9px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: 0;
+      border-radius: 7px;
+      padding: 11px 16px;
+      background: var(--brand);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover { background: var(--brand-dark); }
+    .alert {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #ffcdc7;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    footer {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 720px) {
+      main { width: min(100% - 20px, 980px); margin: 18px auto; }
+      .grid { grid-template-columns: 1fr; }
+      .panel { padding: 16px; }
+      .actions { justify-content: stretch; }
+      button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Chuyển PDF học bạ sang Excel</h1>
+      <p>Upload nhiều PDF, chọn mẫu Excel và tải về file ZIP kết quả.</p>
+    </header>
+
+    {% if error %}
+      <div class="alert">{{ error }}</div>
+    {% endif %}
+
+    <section class="panel">
+      <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+        <div class="grid">
+          <div class="field">
+            <label for="pdf_files">File PDF học bạ</label>
+            <input id="pdf_files" type="file" name="pdf_files" accept=".pdf,application/pdf" multiple required>
+            <div class="hint">Có thể chọn nhiều file cùng lúc.</div>
+          </div>
+
+          <div class="field">
+            <label for="template_file">File Excel mẫu</label>
+            <input id="template_file" type="file" name="template_file" accept=".xlsx">
+            <div class="hint">
+              {% if default_template_exists %}
+                Bỏ trống để dùng mẫu mặc định trong thư mục templates.
+              {% else %}
+                Chưa có mẫu mặc định, cần upload file .xlsx.
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Nạp danh sách PDF</button>
+        </div>
+      </form>
+    </section>
+
+    <footer>Tác giả: Võ Thành Khải - 0913046881 / 0913784333</footer>
+  </main>
+</body>
+</html>

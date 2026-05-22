@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+web_storage/
+web_server.*.log
+.venv/
+venv/
+build/
+dist/
+output/
+backups/
+*.spec
+.~lock.*

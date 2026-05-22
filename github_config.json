@@ -1,0 +1,9 @@
+{
+  "github_owner": "khaivo73",
+  "github_repo": "pdf_hoc_ba_to_excel_tool_C23",
+  "check_interval_hours": 24,
+  "auto_download": true,
+  "auto_install": false,
+  "backup_before_update": true,
+  "show_changelog": true
+}

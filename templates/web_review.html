@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Danh sách PDF</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --text: #17202a;
+      --muted: #697386;
+      --line: #d9dee7;
+      --brand: #0f766e;
+      --brand-dark: #0b5f59;
+      --soft: #eef6f5;
+      --danger-bg: #fff2f0;
+      --danger: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 28px auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-end;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0 0 5px;
+      font-size: clamp(23px, 3.5vw, 34px);
+      letter-spacing: 0;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+      flex-wrap: wrap;
+    }
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      min-width: 780px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--soft);
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #315653;
+    }
+    td:first-child, th:first-child {
+      width: 58px;
+      text-align: center;
+    }
+    .muted { color: var(--muted); }
+    .error-note {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 4px;
+      max-width: 480px;
+    }
+    button, .link-button {
+      border: 0;
+      border-radius: 7px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+    }
+    button.primary {
+      background: var(--brand);
+      color: white;
+    }
+    button.primary:hover { background: var(--brand-dark); }
+    button.secondary, .link-button {
+      background: #e8edf3;
+      color: #243447;
+    }
+    button.danger {
+      background: #ffe4e1;
+      color: var(--danger);
+    }
+    .alert {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #ffcdc7;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    footer {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 720px) {
+      main { width: min(100% - 20px, 1180px); margin: 18px auto; }
+      header { display: block; }
+      .toolbar, .toolbar-actions { display: grid; grid-template-columns: 1fr; }
+      button, .link-button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Danh sách file PDF</h1>
+        <p>Kiểm tra danh sách, bỏ chọn file không cần chuyển rồi tải kết quả.</p>
+      </div>
+      <a class="link-button" href="{{ url_for('index') }}">Upload lại</a>
+    </header>
+
+    {% if error %}
+      <div class="alert">{{ error }}</div>
+    {% endif %}
+
+    <section class="panel">
+      <form action="{{ url_for('convert', job_id=job_id) }}" method="post">
+        <div class="toolbar">
+          <div class="muted">{{ rows|length }} file đã nạp</div>
+          <div class="toolbar-actions">
+            <button class="secondary" type="button" onclick="setAll(true)">Chọn tất cả</button>
+            <button class="secondary" type="button" onclick="setAll(false)">Bỏ chọn tất cả</button>
+            <button class="primary" type="submit">Chuyển và tải ZIP</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Chọn</th>
+                <th>File PDF</th>
+                <th>Tên học sinh</th>
+                <th>Lớp</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in rows %}
+                <tr>
+                  <td>
+                    <input type="checkbox" name="selected_files" value="{{ row.file }}" checked>
+                  </td>
+                  <td>{{ row.file }}</td>
+                  <td>{{ row.student or "Chưa đọc được" }}</td>
+                  <td>{{ row.class_name or "" }}</td>
+                  <td>
+                    {{ row.status }}
+                    {% if row.error %}
+                      <div class="error-note">{{ row.error }}</div>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </form>
+    </section>
+
+    <form action="{{ url_for('delete_job', job_id=job_id) }}" method="post" style="margin-top: 12px;">
+      <button class="danger" type="submit">Xóa phiên upload này</button>
+    </form>
+
+    <footer>Tác giả: Võ Thành Khải - 0913046881 / 0913784333</footer>
+  </main>
+
+  <script>
+    function setAll(checked) {
+      document.querySelectorAll('input[name="selected_files"]').forEach(function (box) {
+        box.checked = checked;
+      });
+    }
+  </script>
+</body>
+</html>

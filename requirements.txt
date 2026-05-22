@@ -1,0 +1,5 @@
+PyMuPDF==1.24.14
+openpyxl==3.1.5
+pyinstaller==6.11.1
+Flask==3.0.3
+gunicorn==22.0.0
